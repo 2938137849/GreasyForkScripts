@@ -5,10 +5,14 @@
 // @match       *://game.maj-soul.com/1/
 // @icon        https://game.maj-soul.com/1/favicon.ico
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      bin
 // ==/UserScript==
-
+const setColor = (pai, color) => {
+  if (pai == null) return;
+  pai.lastColor = color;
+  pai.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, pai.lastColor);
+}
 // 不需要的功能只需要在对应的大括号前加上`/*`
 const runner = () => {
   { // js弹出框替换完成
@@ -87,20 +91,39 @@ const runner = () => {
   } //*/
   { // 副露占位
     let color = new Laya.Vector4(1, 1, 1, .4);
+    const QiPaiNoPass = view.Block_QiPai.prototype.QiPaiNoPass;
     view.Block_QiPai.prototype.QiPaiNoPass = function () {
-      this.last_pai.lastColor = color;
-      this.last_pai.model.meshRender.sharedMaterial.blend = 2;
-      this.last_pai.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, this.last_pai.lastColor);
-      this.last_pai.val.type += 10;
-      this.QiPaiPass();
+      try {
+        setColor(this.last_pai, color);
+        this.last_pai.model.meshRender.sharedMaterial.blend = 2;
+        this.last_pai.val.type += 10;
+        this.QiPaiPass();
+      } catch (e) {
+        QiPaiNoPass.call(this)
+        console.error(e);
+      }
     }
 
     const OnChoosedPai = view.ViewPai.prototype.OnChoosedPai;
     view.ViewPai.prototype.OnChoosedPai = function () {
-      if (this.lastColor !== undefined) {
-        this.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, this.lastColor);
-      } else {
+      try {
+        let e = view.DesktopMgr.Inst.choosed_pai;
+        if (null == e || 0 != mjcore.MJPai.Distance(this.val, e)) {
+          if (this.lastColor !== undefined) {
+            this.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, this.lastColor);
+          } else if (this.isxuezhanhu || this.ispaopai) {
+            this.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, new Laya.Vector4(1, .78, .78, 1));
+          } else if (this.ismoqie) {
+            this.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, new Laya.Vector4(.8, .8, .8, 1));
+          } else {
+            this.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, this.GetDefaultColor());
+          }
+        } else {
+          this.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, new Laya.Vector4(.615, .827, .976, 1));
+        }
+      } catch (e) {
         OnChoosedPai.call(this);
+        console.error(e)
       }
     }
     console.log("副露占位 开");
@@ -174,6 +197,26 @@ const runner = () => {
       console.log("解锁所有语音");
     })
   } //*/
+  { // 立直标注
+    let color = [
+      new Laya.Vector4(228 / 255, 160 / 255, 133 / 255, 1),
+      new Laya.Vector4(252 / 255, 247 / 255, 154 / 255, 1),
+      new Laya.Vector4(205 / 255, 255 / 255, 205 / 255, 1),
+      new Laya.Vector4(1, 1, 1, 1)
+    ]
+    const play = view.ActionLiqi.play;
+    view.ActionLiqi.play = function (...args) {
+      let number = view.DesktopMgr.Inst.players.filter(p => p.trans_liqi.active).length;
+      view.DesktopMgr.Inst.players.forEach(player => {
+        setColor(player.container_qipai.last_pai, color[number]);
+        player.container_qipai.pais.forEach(pai => {
+          setColor(pai, color[number]);
+        });
+      })
+      return play.call(this, ...args);
+    }
+    console.log("立直标注 开");
+  } //*/
 }
 
 new Promise((res) => {
@@ -184,9 +227,7 @@ new Promise((res) => {
     res();
   }, 100);
 }).then(() => {
-  try {
-    runner();
-  } catch (e) {
-    console.warn(e)
-  }
+  runner();
+}).catch(e => {
+  console.warn(e)
 });
