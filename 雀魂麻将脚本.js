@@ -5,7 +5,7 @@
 // @match       *://game.maj-soul.com/1/
 // @icon        https://game.maj-soul.com/1/favicon.ico
 // @grant       none
-// @version     1.4
+// @version     1.5
 // @author      bin
 // ==/UserScript==
 const setColor = (pai, color) => {
@@ -16,7 +16,7 @@ const setColor = (pai, color) => {
 }
 // 不需要的功能只需要在对应的大括号前加上`/*`
 const runner = () => {
-  { // js弹出框替换完成
+  { // js弹出框替换
     /**
      * 提示框
      * @param {(text:string)=>void} text "sometext"
@@ -205,8 +205,8 @@ const runner = () => {
       new Laya.Vector4(205 / 255, 255 / 255, 205 / 255, 1),
       new Laya.Vector4(1, 1, 1, 1)
     ]
-    const setLiqibang = uiscript.UI_DesktopInfo.prototype.setLiqibang;
-    uiscript.UI_DesktopInfo.prototype.setLiqibang = function (t) {
+    const play = view.ActionLiqi.play;
+    view.ActionLiqi.play = function (e) {
       let number = view.DesktopMgr.Inst.players.filter(p => p.trans_liqi.active).length;
       view.DesktopMgr.Inst.players.forEach(player => {
         setColor(player.container_qipai.last_pai, color[number]);
@@ -214,7 +214,7 @@ const runner = () => {
           setColor(pai, color[number]);
         });
       })
-      return setLiqibang.call(this, t);
+      return play.call(this, e);
     }
     console.log("立直标注 开");
   } //*/
