@@ -11,14 +11,6 @@
 
 // 不需要的功能只需要在对应的大括号前加上`/*`
 const runner = () => {
-  { //使用steam服务器
-    const init = app.NetAgent.init;
-    app.NetAgent.init = function () {
-      GameMgr.config_data.ip[0].region_urls.push("http://47.114.218.120:4201/api/v0/recommend_list");
-      console.log("加入steam服务器 开");
-      init.call(this);
-    };
-  } //*/ 
   { //js弹出框替换完成
     /**
      * 提示框
