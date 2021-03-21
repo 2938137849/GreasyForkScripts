@@ -5,11 +5,12 @@
 // @match       *://game.maj-soul.com/1/
 // @icon        https://game.maj-soul.com/1/favicon.ico
 // @grant       none
-// @version     1.3
+// @version     1.4
 // @author      bin
 // ==/UserScript==
 const setColor = (pai, color) => {
   if (pai == null) return;
+  if (pai.lastColor != null) return;
   pai.lastColor = color;
   pai.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, pai.lastColor);
 }
@@ -204,8 +205,8 @@ const runner = () => {
       new Laya.Vector4(205 / 255, 255 / 255, 205 / 255, 1),
       new Laya.Vector4(1, 1, 1, 1)
     ]
-    const play = view.ActionLiqi.play;
-    view.ActionLiqi.play = function (...args) {
+    const setLiqibang = uiscript.UI_DesktopInfo.prototype.setLiqibang;
+    uiscript.UI_DesktopInfo.prototype.setLiqibang = function (t) {
       let number = view.DesktopMgr.Inst.players.filter(p => p.trans_liqi.active).length;
       view.DesktopMgr.Inst.players.forEach(player => {
         setColor(player.container_qipai.last_pai, color[number]);
@@ -213,7 +214,7 @@ const runner = () => {
           setColor(pai, color[number]);
         });
       })
-      return play.call(this, ...args);
+      return setLiqibang.call(this, t);
     }
     console.log("立直标注 开");
   } //*/
