@@ -10,7 +10,7 @@
 // ==/UserScript==
 
 /**
- * @param {any}object 
+ * @param {any}object
  * @param {string|number}field
  * @param {Function}callback
  */
@@ -21,24 +21,28 @@ const hook = (object, field, callback) => {
   let orgin = object[field];
   object[field] = function (...args) {
     callback(...args);
-    orgin.call(this, ...args)
-  }
-}
+    orgin.call(this, ...args);
+  };
+};
 const runner = () => {
-  //使用steam服务器
-  hook(app.NetAgent, "init", () => {
-    console.log("加入steam服务器");
-    GameMgr.config_data.ip[0].region_urls.unshift("http://47.114.218.120:4201/api/v0/recommend_list")
-  })
-}
+  { //使用steam服务器
+    hook(app.NetAgent, "init", () => {
+      console.log("加入steam服务器");
+      GameMgr.config_data.ip[0].region_urls.unshift("http://47.114.218.120:4201/api/v0/recommend_list");
+    });
+  } {
+
+  }
+};
 
 
 new Promise((res) => {
   let interval = setInterval(() => {
-    if (window.game != undefined) {
-      clearInterval(interval);
-      console.log("游戏已加载");
-      res();
+    if (window.game === undefined) {
+      return;
     }
+    clearInterval(interval);
+    console.log("游戏已加载");
+    res();
   }, 1000);
 }).then(() => runner());
