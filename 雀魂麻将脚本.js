@@ -5,13 +5,13 @@
 // @match       *://game.maj-soul.com/1/
 // @icon        https://game.maj-soul.com/1/favicon.ico
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      bin
 // ==/UserScript==
 
 // 不需要的功能只需要在对应的大括号前加上`/*`
 const runner = () => {
-  { //js弹出框替换完成
+  { // js弹出框替换完成
     /**
      * 提示框
      * @param {(text:string)=>void} text "sometext"
@@ -66,7 +66,6 @@ const runner = () => {
         a.root._childs[8].clickHandler = new Laya.Handler(window, e => !fix(a.input.text) && a.destroy());
         a.show();
       });
-
     };
     /**
      * 数字输入框,最大支持输入10位数
@@ -82,11 +81,11 @@ const runner = () => {
       uiscript.UIMgr.Inst.AddLobbyUI(a);
       Laya.timer.frameOnce(5, this, () => {
         a.show(text, new Laya.Handler(window, fix), new Laya.Handler(window, cancel));
-      })
+      });
     }
-    console.log("js弹出框替换完成")
+    console.log("js弹出框替换 开");
   } //*/
-  { //副露占位
+  { // 副露占位
     let color = new Laya.Vector4(1, 1, 1, .4);
     view.Block_QiPai.prototype.QiPaiNoPass = function () {
       this.last_pai.lastColor = color;
@@ -105,10 +104,77 @@ const runner = () => {
       }
     }
     console.log("副露占位 开");
+  } //*/ 
+  { // 强制开启便捷提示
+    const initRoom = view.DesktopMgr.prototype.initRoom;
+    view.DesktopMgr.prototype.initRoom = function (...args) {
+      try {
+        args[0].mode.detail_rule.bianjietishi = true;
+      } catch (e) {
+        console.warn(e);
+      }
+      return initRoom.call(this, ...args);
+    }
+    console.log("便捷提示 开");
+  } //*/
+  { // 电脑随机皮肤
+    let players = [0, 0, 0, 0];
+    players.get = function () {
+      for (let i = 0; i < 3; i++) {
+        let value = this.shift();
+        if (value > 1) {
+          return value;
+        }
+      }
+      return getSkin();
+    }
+    let getSkin = () => {
+      let index = Math.random() * (cfg.item_definition.skin.rows_.length - 2) >> 0;
+      return cfg.item_definition.skin.rows_[index + 2].id;
+    }
+    const openMJRoom = game.Scene_MJ.prototype.openMJRoom
+    game.Scene_MJ.prototype.openMJRoom = function (...args) {
+      args[1].forEach(player => {
+        if (!player.account_id) {
+          player.avatar_id = players.get();
+          player.character.charid = cfg.item_definition.skin.map_[player.avatar_id].character_id;
+          player.character.level = 5;
+          player.character.skin = player.avatar_id;
+          player.nickname = cfg.item_definition.character.map_[player.character.charid]["name_chs"]
+        }
+      });
+      return openMJRoom.call(this, ...args)
+    }
+
+    const _refreshPlayerInfo = uiscript.UI_WaitingRoom.prototype._refreshPlayerInfo
+    uiscript.UI_WaitingRoom.prototype._refreshPlayerInfo = function (t) {
+      if (t.account_id === 0 && players[t.cell_index] === 0) {
+        console.log(t);
+        players[t.cell_index] = t.avatar_id = getSkin();
+        t.nickname = cfg.item_definition.character.map_[cfg.item_definition.skin.map_[t.avatar_id].character_id]["name_chs"]
+      }
+      return _refreshPlayerInfo.call(this, t)
+    }
+
+    const _clearCell = uiscript.UI_WaitingRoom.prototype._clearCell
+    uiscript.UI_WaitingRoom.prototype._clearCell = function (t) {
+      players[t] = 0;
+      return _clearCell.call(this, t)
+    }
+    console.log("电脑随机皮肤 开");
+  } //*/
+  { // 解锁所有语音
+    let interval = setInterval(() => {
+      if (window?.cfg?.voice?.sound?.rows_ === undefined) return;
+      clearInterval(interval);
+      cfg.voice.sound.rows_.forEach(sound => {
+        sound.level_limit = 0;
+        sound.bond_limit = 0;
+      });
+      console.log("解锁所有语音");
+    })
   } //*/
 }
-
-
 
 new Promise((res) => {
   let interval = setInterval(() => {
@@ -117,4 +183,10 @@ new Promise((res) => {
     console.log("游戏已加载");
     res();
   }, 100);
-}).then(() => runner());
+}).then(() => {
+  try {
+    runner();
+  } catch (e) {
+    console.warn(e)
+  }
+});
