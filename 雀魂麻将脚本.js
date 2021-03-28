@@ -5,13 +5,13 @@
 // @match       *://game.maj-soul.com/1/
 // @icon        https://game.maj-soul.com/1/favicon.ico
 // @grant       none
-// @version     1.8
+// @version     1.9
 // @author      bin
 // ==/UserScript==
 
-const setColor = (pai, color) => {
+const setColor = (pai, color, force = false) => {
   if (pai == null) return;
-  if ("lastColor" in pai) return;
+  if (!force && ("lastColor" in pai)) return;
   pai.lastColor = color;
   pai.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, pai.lastColor);
 }
@@ -96,8 +96,7 @@ const runner = () => {
     const QiPaiNoPass = view.Block_QiPai.prototype.QiPaiNoPass;
     view.Block_QiPai.prototype.QiPaiNoPass = function () {
       try {
-        pai.lastColor = color;
-        pai.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, pai.lastColor);
+        setColor(this.last_pai, color, true)
         this.last_pai.model.meshRender.sharedMaterial.blend = 2;
         this.last_pai.val.type += 10;
         this.QiPaiPass();
