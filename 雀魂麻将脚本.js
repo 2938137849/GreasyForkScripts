@@ -5,7 +5,7 @@
 // @match       *://game.maj-soul.com/1/
 // @icon        https://game.maj-soul.com/1/favicon.ico
 // @grant       none
-// @version     1.5
+// @version     1.6
 // @author      bin
 // ==/UserScript==
 const setColor = (pai, color) => {
