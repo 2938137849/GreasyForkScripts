@@ -8,6 +8,7 @@
 // @version     1.6
 // @author      bin
 // ==/UserScript==
+
 const setColor = (pai, color) => {
   if (pai == null) return;
   if ("lastColor" in pai) return;
