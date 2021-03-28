@@ -5,7 +5,7 @@
 // @match       *://game.maj-soul.com/1/
 // @icon        https://game.maj-soul.com/1/favicon.ico
 // @grant       none
-// @version     1.6
+// @version     1.7
 // @author      bin
 // ==/UserScript==
 
