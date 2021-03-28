@@ -5,7 +5,7 @@
 // @match       *://game.maj-soul.com/1/
 // @icon        https://game.maj-soul.com/1/favicon.ico
 // @grant       none
-// @version     1.7
+// @version     1.8
 // @author      bin
 // ==/UserScript==
 
@@ -96,7 +96,8 @@ const runner = () => {
     const QiPaiNoPass = view.Block_QiPai.prototype.QiPaiNoPass;
     view.Block_QiPai.prototype.QiPaiNoPass = function () {
       try {
-        setColor(this.last_pai, color);
+        pai.lastColor = color;
+        pai.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, pai.lastColor);
         this.last_pai.model.meshRender.sharedMaterial.blend = 2;
         this.last_pai.val.type += 10;
         this.QiPaiPass();
