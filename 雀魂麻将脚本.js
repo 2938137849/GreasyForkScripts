@@ -10,7 +10,7 @@
 // ==/UserScript==
 const setColor = (pai, color) => {
   if (pai == null) return;
-  if (pai.lastColor != null) return;
+  if ("lastColor" in pai) return;
   pai.lastColor = color;
   pai.model.meshRender.sharedMaterial.setColor(caps.Cartoon.COLOR, pai.lastColor);
 }
@@ -205,16 +205,24 @@ const runner = () => {
       new Laya.Vector4(205 / 255, 255 / 255, 205 / 255, 1),
       new Laya.Vector4(1, 1, 1, 1)
     ]
-    const play = view.ActionLiqi.play;
-    view.ActionLiqi.play = function (e) {
+    const changeColor = () => {
       let number = view.DesktopMgr.Inst.players.filter(p => p.trans_liqi.active).length;
       view.DesktopMgr.Inst.players.forEach(player => {
         setColor(player.container_qipai.last_pai, color[number]);
         player.container_qipai.pais.forEach(pai => {
           setColor(pai, color[number]);
         });
-      })
+      });
+    }
+    const play = view.ActionLiqi.play;
+    view.ActionLiqi.play = function (e) {
+      changeColor();
       return play.call(this, e);
+    }
+    const fastplay = view.ActionLiqi.fastplay;
+    view.ActionLiqi.fastplay = function (e, i) {
+      changeColor();
+      return fastplay.call(this, e, i);
     }
     console.log("立直标注 开");
   } //*/
